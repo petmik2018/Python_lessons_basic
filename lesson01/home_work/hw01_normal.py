@@ -10,7 +10,7 @@ __author__ = 'Петухов Михаил Юрьевич'
 # * постарайтесь решить задачу с применением арифметики и цикла while;
 # * при желании и понимании решите задачу с применением цикла for.
 
-
+# версия с использованием цикла while
 x = 58375
 numberCurrent = 0
 numberMax = 0
@@ -22,6 +22,16 @@ while x != 0 :
 	x = x // 10
 print("Maximal number: ", numberMax)
 
+# версия с использованием цикла for
+x = 45683
+numberMax = '0'
+
+for numberCurrent in str(x) :
+	print(numberCurrent)
+	if numberCurrent > numberMax :
+		numberMax = numberCurrent
+print("Maximal number: ", numberMax)
+
 
 # Задача-2: Исходные значения двух переменных запросить у пользователя.
 # Поменять значения переменных местами. Вывести новые значения на экран.
@@ -29,6 +39,8 @@ print("Maximal number: ", numberMax)
 # Подсказки:
 # * постарайтесь сделать решение через действия над числами;
 # * при желании и понимании воспользуйтесь синтаксисом кортежей Python.
+
+# версия через действия над числами
 
 a = input("Input first value, please: ")
 b = input("Input first value, please: ")
@@ -38,6 +50,16 @@ b = int(b)
 a = a + b
 b = a - b
 a = a - b 
+print("Change is completed!")
+print("First value : ", a, "; Second value : ", b)
+
+
+# версия с использованием синтаксиса кортежей (нагуглил)
+
+a = input("Input first value, please: ")
+b = input("Input first value, please: ")
+print("First value : ", a, "; Second value : ", b)
+a, b = b, a
 print("Change is completed!")
 print("First value : ", a, "; Second value : ", b)
 
