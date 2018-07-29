@@ -4,17 +4,11 @@
 equation = 'y = -12x + 11111140.2121'
 x = 2.5
 # вычислите и выведите y
-i = 0
 
 # определяются положения символов =, x, и + в исходной строке
-for char in equation:
-	if char == "=":
-		positionEq = i
-	if char == "x":
-		positionX = i
-	if char == "+":
-		positionPlus = i
-	i += 1
+positionEq = equation.index("=")
+positionX = equation.index("x")
+positionPlus = equation.index("+")
 
 k = equation[positionEq+1:positionX] #вырезается k, возможно, с пробелами спереди и сзади
 b = equation[positionPlus+1:]	#вырезается b, возможно, с пробелами спереди
@@ -34,8 +28,8 @@ print("Ответ: Y ({}) = {}".format(x, y))
 #  (т.е. 2 символа для дня, 2 - для месяца, 4 - для года)
 
 # Пример корректной даты
-#date = '01.11.1985'
-date = '15.11.1988'
+
+date = '15.09.1988'
 
 # Примеры некорректных дат
 #date = '01.22.1001'
@@ -119,7 +113,7 @@ while continueCircle:
 			continueCircle = False # мы уже на нужном этаже, выходим из цикла
 			break
 			
-# можно для ясности или проверки вывести количество квартир на каждом этаже	
+# можно для наглядности или проверки вывести список с количеством квартир на каждом этаже	
 # print(floors) 
 
 place = floorType + apartNumber - apartNumberDraft # вычисляется позиция квартиры на этаже 1<=...<=floorType
