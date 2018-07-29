@@ -4,7 +4,24 @@
 equation = 'y = -12x + 11111140.2121'
 x = 2.5
 # вычислите и выведите y
+i = 0
 
+# определяются положения символов =, x, и + в исходной строке
+for char in equation:
+	if char == "=":
+		positionEq = i
+	if char == "x":
+		positionX = i
+	if char == "+":
+		positionPlus = i
+	i += 1
+
+k = equation[positionEq+1:positionX] #вырезается k, возможно, с пробелами спереди и сзади
+b = equation[positionPlus+1:]	#вырезается b, возможно, с пробелами спереди
+
+# вычисление и вывод результата
+y = float(k) * x + float(b)
+print("Ответ: Y ({}) = {}".format(x, y))
 
 # Задание-2: Дата задана в виде строки формата 'dd.mm.yyyy'.
 # Проверить, корректно ли введена дата.
@@ -17,12 +34,41 @@ x = 2.5
 #  (т.е. 2 символа для дня, 2 - для месяца, 4 - для года)
 
 # Пример корректной даты
-date = '01.11.1985'
+#date = '01.11.1985'
+date = '15.11.1988'
 
 # Примеры некорректных дат
-date = '01.22.1001'
-date = '1.12.1001'
-date = '-2.10.3001'
+#date = '01.22.1001'
+#date = '1.12.1001'
+#date = '-2.10.3001'
+
+comment = ""
+daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+if len(date) != 10:
+	comment = "длина строки должна быть 10 символов"
+else:
+	if date[2] != "." or date[5] != ".":
+		comment = "где-то не там точки стоят"
+	else:
+		year = int(date[-4:])
+		if year < 1: # в этой постановке задачи все значения годятся кроме 0
+			comment = "год не может быть нулевым"
+		else:
+			day = int(date[:2])
+			month = int(date[3:5])
+			if month < 1 or month > 12:
+				comment = "неправильно указан месяц"
+			elif day == 29 and month == 2 and year % 4 == 0: # исключение для 29 февраля високосного года
+				pass
+			else:
+				if day < 1 or day > daysInMonth[month-1]:
+					comment = "неправильно указан день"
+
+if comment == "":
+	print("Дата задана корректно")
+else:
+	print("Дата задана некорректно,", comment)
 
 
 # Задание-3: "Перевёрнутая башня" (Задача олимпиадного уровня)
@@ -54,3 +100,28 @@ date = '-2.10.3001'
 #
 # Вход: 11
 # Выход: 5 3
+
+
+apartNumber = 13
+
+floors = [] # список этажей с количеством квартир на каждом
+floorType = 0 # количество квартир на текущем этаже
+continueCircle = True
+apartNumberDraft = 0 # номер последней квартиры на искомом этаже 
+
+# цикл останавливается, если номер последней квартиры на текужем этаже превышает заданный
+while continueCircle:
+	floorType += 1
+	for i in range(0, floorType): # перебор всех этажей с количеством квартир floorType
+		floors.append(floorType)
+		apartNumberDraft += floorType 
+		if apartNumberDraft >= apartNumber:
+			continueCircle = False # мы уже на нужном этаже, выходим из цикла
+			break
+			
+# можно для ясности или проверки вывести количество квартир на каждом этаже	
+# print(floors) 
+
+place = floorType + apartNumber - apartNumberDraft # вычисляется позиция квартиры на этаже 1<=...<=floorType
+
+print("Apartment No {} is located on the floor {} , place {}".format(apartNumber, len(floors), place) )
