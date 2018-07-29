@@ -101,26 +101,16 @@ print("Исходник:",listStart)
 
 # ------------пункт а----------------
 for element in listStart: # Перебор всех элементов из первого списка
-	elementIsNotInList = True # Элемент пока не обнаружен во втором списке
-	
-	for elementInTarget in listTarget1: # Перебор всех элементов из динамического второго списка
-		if elementInTarget == element: # Если элемент обнаружен, ликвидируется условие
-			elementIsNotInList = False # добавления элемента во второй список
-			
-	if elementIsNotInList: # если элемент не найден во втором списке, добавляем его туда
+	if element in listTarget1: # Проверяем есть ли текущий элемент в динамическом второго списка
+		pass
+	else:                      # если его там нет, добавляем
 		listTarget1.append(element)
 		
 print("Список без повторов:",listTarget1)
 
 # ------------пункт б----------------		
 for element in listStart: # Перебор всех элементов из первого списка
-	i = 0 # счетчик присутствий элемента в основном списке
-	
-	for elementInTarget in listStart: # Перебор еще раз всех элементов из первого списка
-		if elementInTarget == element: # Если элемент обнаружен,счетчик увеличивается на единицу
-			i += 1 						# один раз точно обнаружится
-			
-	if i == 1: # если элемент не продублировался в основном списке
+	if listStart.count(element) == 1: # если элемент присутствует один раз, добавляем во второй список
 		listTarget2.append(element)	
 		
 print("Элементы без повторений:",listTarget2)
