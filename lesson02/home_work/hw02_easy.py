@@ -42,9 +42,8 @@ listMain = [1, 2, 4, 5, 6, 2, 4, 5, 1, 2, 6]
 listEx = [1, 4]
 
 for element in listMain: # перебор всех элементов в первом списке
-	for element2 in listEx:  # сравнивание текущего элемента со всеми из второго списка
-		if element == element2:
-			listMain.remove(element)
+	if element in listEx:  # проверяем есть ли текущий элемента во втором списке
+		listMain.remove(element)
 print(listMain)
 
 
