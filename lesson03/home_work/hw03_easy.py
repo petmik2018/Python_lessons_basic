@@ -5,12 +5,16 @@
 # Для решения задачи не используйте встроенные функции и функции из модуля math.
 
 def my_round(number, ndigits):
-    pass
+    mult = 10**ndigits
+    number = number * mult
+    number = round(number)
+    return number/mult
 
 
 print(my_round(2.1234567, 5))
 print(my_round(2.1999967, 5))
 print(my_round(2.9999967, 5))
+print(my_round(2.4444451, 5))
 
 
 # Задание-2:
@@ -20,7 +24,16 @@ print(my_round(2.9999967, 5))
 # !!!P.S.: функция не должна НИЧЕГО print'ить
 
 def lucky_ticket(ticket_number):
-    pass
+    sum1 = 0
+    sum2 = 0
+    for i in range(0,3):
+        sum1 += ticket_number % 10
+        ticket_number = ticket_number // 10
+    for i in range(0,3):
+        sum2 += ticket_number % 10
+        ticket_number = ticket_number // 10
+    return sum1 == sum2
+    
 
 
 print(lucky_ticket(123006))
