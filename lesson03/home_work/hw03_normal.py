@@ -33,7 +33,19 @@ print(sort_to_max([2, 10, -12, 2.5, 20, -11, 4, 4, 0]))
 # Напишите собственную реализацию стандартной функции filter.
 # Разумеется, внутри нельзя использовать саму функцию filter.
 
+def my_function(a):
+    return a > 0
 
+def my_filter(filter_function,my_list):
+    result = []
+    for elem in my_list:
+        if filter_function(elem):
+            result.append(elem)
+    return result
+
+arr = [2, 0, -3, 7, -1, -10, 3]
+print(my_filter(my_function, arr))
+    
 # Задача-4:
 # Даны четыре точки А1(х1, у1), А2(x2 ,у2), А3(x3 , у3), А4(х4, у4).
 # Определить, будут ли они вершинами параллелограмма.
