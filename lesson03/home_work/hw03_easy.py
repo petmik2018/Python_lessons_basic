@@ -10,7 +10,6 @@ def my_round(number, ndigits):
     number = round(number)
     return number/mult
 
-
 print(my_round(2.1234567, 5))
 print(my_round(2.1999967, 5))
 print(my_round(2.9999967, 5))
@@ -24,17 +23,11 @@ print(my_round(2.4444451, 5))
 # !!!P.S.: функция не должна НИЧЕГО print'ить
 
 def lucky_ticket(ticket_number):
-    sum1 = 0
-    sum2 = 0
-    for i in range(0,3):
-        sum1 += ticket_number % 10
+    numbers =[]
+    for i in range(0,6):
+        numbers.append(ticket_number % 10)
         ticket_number = ticket_number // 10
-    for i in range(0,3):
-        sum2 += ticket_number % 10
-        ticket_number = ticket_number // 10
-    return sum1 == sum2
-    
-
+    return sum(numbers[:3]) == sum(numbers[3:])
 
 print(lucky_ticket(123006))
 print(lucky_ticket(12321))
