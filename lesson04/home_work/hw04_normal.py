@@ -20,6 +20,22 @@ line = 'mtMmEZUOmcqWiryMQhhTxqKdSTKCYEJlEZCsGAMkgAYEOmHBSQsSUHKvSfbmxULaysmNO'\
        'XiUWgsKQrDOeZoNlZNRvHnLgCmysUeKnVJXPFIzvdDyleXylnKBfLCjLHntltignbQoiQ'\
        'zTYwZAiRwycdlHfyHNGmkNqSwXUrxGc'
 
+       # -----------первый способ----------
+import re
+result = re.split(r"[ABCDEFGHIJKLMNOPQRSTUVWXYZ]+", line)
+print(result)
+
+
+#----------второй способ----------------
+new_line = ""
+symbols_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+for sym in line:
+    if sym in symbols_upper:
+        new_line += " "
+    else:
+        new_line += sym
+new_line = list(filter(len, new_line.split(" ")))
+print(new_line)
 
 # Задание-2:
 # Вывести символы в верхнем регистре, слева от которых находятся
