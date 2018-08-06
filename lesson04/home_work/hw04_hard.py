@@ -68,56 +68,23 @@ print(result)
 # -------альтернативный вариант решения, в один проход по списку
 # тоже чистая математика. Как привлечь к решению тему урока, не придумал
 
-# первая часть решения - есть ли где-нибудь два ферзя на одной горизонтали или вертикали
+horisontal = [0 for _ in range(0,9)] # индикатор ферзей на одной горизонтали
+vertical = [0 for _ in range(0,9)] # индикатор ферзей на одной вертикали
+diagonal_right = [0 for _ in range(0,15)] # индикатор ферзей на "правых" диагоналях
+# для фигур на одной "правой" диагонали совпадают разности координат (от -7 до 7)
+diagonal_left = [0 for _ in range(0,15)] # индикатор ферзей на "левых" диагоналях
+# для фигур на одной "правой" диагонали совпадают суммы координат (от 2 до 16)
 
+for ferz in figures: # при попадании фигуры на линию индикатор увеличивается на 1
+    horisontal[ferz[0]] += 1
+    vertical[ferz[1]] += 1
+    diagonal_right[(ferz[1]-ferz[0] + 7)] += 1
+    diagonal_left[(ferz[1]+ferz[0] - 2)] += 1
+    
 result = "NO"
+if max(horisontal) > 1: result = "YES"
+if max(vertical) > 1: result = "YES"
+if max(diagonal_right) > 1: result = "YES"
+if max(diagonal_left) > 1: result = "YES"
 
-# формируются строки из координат по горизонтали и вертикали
-# проверяется, нет ли повторений
-
-x = []
-y = []
-for elem in figures:
-    x.append(str(elem[0]))
-    y.append(str(elem[1]))
-x = ''.join(x)
-y = ''.join(y)
-#print(x)
-#print(y)
-
-for i in range(1,10):
-    if x.count(str(i)) > 1 or y.count(str(i)) > 1: # если какая-нибудь цифра встречается 2 и более раз
-        result = "Yes"
-        break
-print("Вертикали и горизонтали проверены, ",result)
-
-# вторая часть решения - есть ли где-нибудь два ферзя на одной диагонали
-
-diagonals = []
-for i in range(-7, 8): diagonals.append(0) # список индикаторов из 15 нудей
-result = "NO"
-# проверка по диагоналям слева-внизу ----> справа-вверху
-# для всех фигур на одной диагонали совпадает разность координат от -7 до 7
-
-for ferz in figures:
-    if diagonals[ferz[1]-ferz[0] + 7] == 1:
-        result = "YES"
-        print("На одной диагонали с {} уже eсть фигура".format(ferz))
-        break
-    if diagonals[ferz[1]-ferz[0] + 7] == 0: diagonals[ferz[1]-ferz[0] + 7] = 1
-print("Первая часть диагоналей проверена, ", result)
-
-
-# проверка по диагоналям слева-вверху ----> справа-внизу
-# для всех фигур на одной диагонали совпадает сумма координат от 2 до 16
-
-for i in range(0, 15): diagonals[i] = 0 # обнуление списка индикаторов
-result = "NO"
-
-for ferz in figures:
-    if diagonals[ferz[1]+ferz[0] - 2] == 1:
-        result = "YES"
-        print("На одной диагонали с {} уже eсть фигура".format(ferz))
-        break
-    if diagonals[ferz[1]+ferz[0] - 2] == 0: diagonals[ferz[1]+ferz[0] - 2] = 1
-print("Вторая часть диагоналей проверена, ", result)
+print(result
