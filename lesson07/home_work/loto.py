@@ -1,59 +1,150 @@
 #!/usr/bin/python3
 
-"""
-== Лото ==
+# Программа позволяет играть в лото в разных конфигурациях:
+# Числа на карточках и бочонках берутся из диапазона от 1 до Num_max, возможно Num_max = 90
+# Чтобы сыграть укороченную версию, уменьшите число Num_max, например, до 30
+# Количество линий на карточках = Numbers_of_lines, для примера Numbers_of_lines = 3
+# Количество позиций в линии  на карточках = Numbers_of_columns, для примера Numbers_of_columns = 9
+# На каждой линии может располагаться Numbers_per_line чисел, для примера Numbers_per_line = 5
 
-Правила игры в лото.
+import random
 
-Игра ведется с помощью специальных карточек, на которых отмечены числа, 
-и фишек (бочонков) с цифрами.
+def make_your_choice(title, char_1, char_2):
+    # служебная функция для выбора из двух символов
+    while True:
+        choice = input(title)
+        if choice == char_1 or choice == char_2:
+            return choice
+        else:
+            print("Что-то не то нажали")
 
-Количество бочонков — 90 штук (с цифрами от 1 до 90).
+class IterObj:
+    def __init__(self, iterations, num_max):
+        self.i = 0
+        self.iterations = iterations
+        self.num_max = num_max
+        self.numbers = []
+        for i in range(0, self.num_max): self.numbers.append(i+1)
 
-Каждая карточка содержит 3 строки по 9 клеток. В каждой строке по 5 случайных цифр, 
-расположенных по возрастанию. Все цифры в карточке уникальны. Пример карточки:
+    def __next__(self):
+        self.i += 1
+        if self.i <= self.iterations:
+            index = random.randint(1, len(self.numbers))
+            num = self.numbers.pop(index-1)
+            return num
+        else:
+            raise StopIteration
 
---------------------------
-    9 43 62          74 90
- 2    27    75 78    82
-   41 56 63     76      86 
---------------------------
+class Iter:
+    # итератор генерирует последовательность НЕПОВТОРЯЮЩИХСЯ случайных чисел
+    def __init__(self, iterations, num_max):
+        self.iterations = iterations
+        self.num_max = num_max
+    def __iter__(self):
+        return IterObj(self.iterations, self.num_max)
+        
+class Card:
+    def __init__(self, title, num_max, number_of_lines, number_of_columns, numbers_per_line):
+        self.title = title
+        self.num_max = num_max
+        self.number_of_lines = number_of_lines
+        self.number_of_columns = number_of_columns
+        self.numbers_per_line = numbers_per_line
+        self.card = []
+        # генерируется список из 15 случайных неповторяющихся чисел
+        self.numbers = []
+        obj = Iter(self.number_of_lines*self.numbers_per_line, self.num_max)
+        for el in obj: self.numbers.append(el)
+        # итератор в 5 чисел из 9 для расстановки чисел по линиям карточки
+        obj = Iter(self.numbers_per_line, self.number_of_columns)
 
-В игре 2 игрока: пользователь и компьютер. Каждому в начале выдается 
-случайная карточка. 
+        for l in range(0, self.number_of_lines):
+            # список из 15 случайных чисел нарезается на 3 списка по 5
+            line_of_numbers = self.numbers[l*self.numbers_per_line:(l+1)*self.numbers_per_line]
+            line_of_numbers.sort()
+            # создается список из 5 случайных позиций 
+            positions = []
+            for el in obj: positions.append(el)
+            positions.sort()
+            # линия из 9 позиций заполняется 5-ю числами
+            self.card.append([])
+            j = 0
+            for i in range(1, self.number_of_columns+1):
+                if i in positions:
+                    self.card[l].append(line_of_numbers[j])
+                    j += 1
+                else:
+                    self.card[l].append("")
+                    
+    def __str__(self): 
+#        print(self.numbers)
+        result_string = ""
+        for i in range(0, self.number_of_lines): 
+            for el in self.card[i]:
+                if el == "":
+                    result_string += "  _"
+                else:
+                    result_string += str(el).rjust(3, " ")
+            result_string += "\n"
+        return "\n" + self.title + "\n" +result_string
+        
+    def has_this_number(self, num):
+    # проверка на присутствие числа в карточке
+        self.num = num
+        if num in self.numbers:
+            return True
+        else:
+            return False
+            
+    def remove(self, num):
+    # удаление числа из карточки
+        self.num = num
+        self.numbers.remove(num)
+        for i in range(0, self.number_of_lines): 
+            if self.card[i].count(num):
+                self.card[i][self.card[i].index(num)] = ""
+                
+    def game_over(self):
+    # проверка карточки на пустоту
+        return len(self.numbers) == 0
 
-Каждый ход выбирается один случайный бочонок и выводится на экран.
-Также выводятся карточка игрока и карточка компьютера.
+# параметры игры, для ускорения можно уменьшить Num_max,например, до 30
+Num_max = 90
+Numbers_of_lines = 3
+Numbers_of_columns = 9
+Numbers_per_line = 5
 
-Пользователю предлагается зачеркнуть цифру на карточке или продолжить.
-Если игрок выбрал "зачеркнуть":
-	Если цифра есть на карточке - она зачеркивается и игра продолжается.
-	Если цифры на карточке нет - игрок проигрывает и игра завершается.
-Если игрок выбрал "продолжить":
-	Если цифра есть на карточке - игрок проигрывает и игра завершается.
-	Если цифры на карточке нет - игра продолжается.
-	
-Побеждает тот, кто первый закроет все числа на своей карточке.
+my_card = Card("ВАША КАРТОЧКА", Num_max, Numbers_of_lines, Numbers_of_columns, Numbers_per_line)
+computer_card = Card("КАРТОЧКА КОМПЬЮТЕРА", Num_max, Numbers_of_lines, Numbers_of_columns, Numbers_per_line)
+games = Iter(Num_max, Num_max)
+round_rest = Num_max
 
-Пример одного хода:
-
-Новый бочонок: 70 (осталось 76)
------- Ваша карточка -----
- 6  7          49    57 58
-   14 26     -    78    85
-23 33    38    48    71   
---------------------------
--- Карточка компьютера ---
- 7 87     - 14    11      
-      16 49    55 88    77    
-   15 20     -       76  -
---------------------------
-Зачеркнуть цифру? (y/n)
-
-Подсказка: каждый следующий случайный бочонок из мешка удобно получать 
-с помощью функции-генератора.
-
-Подсказка: для работы с псевдослучайными числами удобно использовать 
-модуль random: http://docs.python.org/3/library/random.html
-
-"""
+for step in games: 
+    print(my_card)
+    print(computer_card)
+    round_rest -= 1
+    print("Очередной бочонок: {}, осталось раундов: {}".format(step,round_rest))
+    
+    # наверное, этот кусок можно написать покомпактней,
+    # но через ветвления if-else хорошо видна логика, поэтому оставил так
+    if computer_card.has_this_number(step):
+            computer_card.remove(step)
+            print("КОМПЬЮТЕР ВИДИТ У СЕБЯ ЧИСЛО {}".format(step))
+    if make_your_choice("Сделайте Ваш выбор: зачеркнуть - Z, пропустить - C: ", "Z", "C") == "Z":
+        if my_card.has_this_number(step):
+            my_card.remove(step)
+            print("БРАВО! ВЫ УСПЕШНО УБРАЛИ ЧИСЛО!!!")
+        else:
+            print("ОШИБКА! НЕТ ТАКОГО ЧИСЛА, ВАМ ЗАСЧИТАНО ПОРАЖЕНИЕ :((")
+            break
+    else:
+        if my_card.has_this_number(step):
+            print("ВЫ НЕВНИМАТЕЛЬНЫ, ПРОПУСТИЛИ ЧИСЛО {}".format(step))
+            print("ВАМ ЗАСЧИТАНО ПОРАЖЕНИЕ :((")
+            break
+    if computer_card.game_over():
+        print("К СОЖАЛЕНИЮ, ПОБЕДИЛ КОМПЬЮТЕР :((")
+        break
+    if my_card.game_over():
+        print("ВЫ ПОБЕДИЛИ !!!!!")
+        break
