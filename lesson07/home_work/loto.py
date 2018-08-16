@@ -68,6 +68,7 @@ class Card:
             positions.sort()
             # линия из 9 позиций заполняется 9-ю пустыми символами
             self.card.append([""]*number_of_columns)
+            # числа расставляются на случайные места в линии
             while len(positions):
                 self.card[l][positions.pop()-1] = line_of_numbers.pop()
                     
