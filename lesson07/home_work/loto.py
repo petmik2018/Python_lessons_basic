@@ -66,15 +66,10 @@ class Card:
             positions = []
             for el in obj: positions.append(el)
             positions.sort()
-            # линия из 9 позиций заполняется 5-ю числами
-            self.card.append([])
-            j = 0
-            for i in range(1, self.number_of_columns+1):
-                if i in positions:
-                    self.card[l].append(line_of_numbers[j])
-                    j += 1
-                else:
-                    self.card[l].append("")
+            # линия из 9 позиций заполняется 9-ю пустыми символами
+            self.card.append([""]*number_of_columns)
+            while len(positions):
+                self.card[l][positions.pop()-1] = line_of_numbers.pop()
                     
     def __str__(self): 
 #        print(self.numbers)
