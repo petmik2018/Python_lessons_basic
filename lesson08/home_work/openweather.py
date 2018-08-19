@@ -1,125 +1,206 @@
+# В силу недостатка времени и знаний предоставляю законченную версию программы,
+# выдающую информацию о текущей погоде в любом городе мира
+# Для получения информации необходимо сначала выбрать страну
+# Для облегчения выбора страны предлагается ввести несколько первых букв названия
+# Например, "R" или "Ru" или "Rus" и т.п.
+# Для облегчения выбора города из выбранной страны
+# предлагается ввести несколько первых букв названия
+# Например, "B" или "Bo" или "Bos" и т.п.
+# Для Москвы работает, для Бостона тоже. На Париже почему-то заткнулась, что-то не то с данными о направлении ветра
 
-""" 
-== OpenWeatherMap ==
+# -*- coding: utf-8 -*-       
+import json
+import codecs
+import re
+import urllib.request
+import gzip
+import os
 
-OpenWeatherMap — онлайн-сервис, который предоставляет бесплатный API
- для доступа к данным о текущей погоде, прогнозам, для web-сервисов
- и мобильных приложений. Архивные данные доступны только на коммерческой основе.
- В качестве источника данных используются официальные метеорологические службы
- данные из метеостанций аэропортов, и данные с частных метеостанций.
+class Country:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
 
-Необходимо решить следующие задачи:
-
-== Получение APPID ==
-    Чтобы получать данные о погоде необходимо получить бесплатный APPID.
-    
-    Предлагается 2 варианта (по желанию):
-    - получить APPID вручную
-    - автоматизировать процесс получения APPID, 
-    используя дополнительную библиотеку GRAB (pip install grab)
-
-        Необходимо зарегистрироваться на сайте openweathermap.org:
-        https://home.openweathermap.org/users/sign_up
-
-        Войти на сайт по ссылке:
-        https://home.openweathermap.org/users/sign_in
-
-        Свой ключ "вытащить" со страницы отсюда:
-        https://home.openweathermap.org/api_keys
+class City:
+    def __init__(self, data):
+        self.id = data["id"]
+        self.name = data["name"]
+        self.country = data["country"]
+        self.coord = data["coord"]
         
-        Ключ имеет смысл сохранить в локальный файл, например, "app.id"
-
+def get_num_elements_with_chars(data_list, chars = ""):
+    l = len(chars)
+    new_list = list(filter(lambda x: x.name[:l] == chars, data_list))
+    return len(new_list)
         
-== Получение списка городов ==
-    Список городов может быть получен по ссылке:
-    http://bulk.openweathermap.org/sample/city.list.json.gz
+def get_list_filtered_by_name(data_list, chars = ""):
+    l = len(chars)
+    if l :
+        new_list = list(filter(lambda x: x.name[:l] == chars, data_list))
+        if new_list == []: print("Ничего не найдено, повторите выбор")
+        return new_list
+    else: return data_list
     
-    Далее снова есть несколько вариантов (по желанию):
-    - скачать и распаковать список вручную
-    - автоматизировать скачивание (ulrlib) и распаковку списка 
-     (воспользоваться модулем gzip 
-      или распаковать внешним архиватором, воспользовавшись модулем subprocess)
+def get_list_filtered_by_id(data_list, my_id):
+    new_list = list(filter(lambda x: x.country == my_id, data_list))
+    if new_list == []: print("Ничего не найдено, повторите выбор")
+    return new_list
+
     
-    Список достаточно большой. Представляет собой JSON-строки:
-{"_id":707860,"name":"Hurzuf","country":"UA","coord":{"lon":34.283333,"lat":44.549999}}
-{"_id":519188,"name":"Novinki","country":"RU","coord":{"lon":37.666668,"lat":55.683334}}
+def get_list_element_id_name(data_list):
+    i = 0
+    print("\n")
+    for el in data_list:
+        i += 1
+        print(i, el.id, el.name)
+    while True:
+        index = input("Выберите номер: ")
+        try:
+            index = int(index)
+            if index in range(1, len(data_list)+1):
+                print("Ваш выбор: ", data_list[index-1].name)
+                return [data_list[index-1].id, data_list[index-1].name]
+            else: print("Нет такого номера в списке")
+        except ValueError:
+            print("Вы что-то не так выбрали")
+             
+def get_list_from_json_file(path):
+    fileObj = codecs.open( path, "r", "utf_8_sig" )
+    text = fileObj.read()
+    return json.loads(text)
     
-    
-== Получение погоды ==
-    На основе списка городов можно делать запрос к сервису по id города. И тут как раз понадобится APPID.
-        By city ID
-        Examples of API calls:
-        http://api.openweathermap.org/data/2.5/weather?id=2172797&appid=b1b15e88fa797225412429c1c50c122a
+def choose_country():
+    print("Загружается список стран...")
+    response = urllib.request.urlopen("http://country.io/names.json")
+    res_file = open("countries.txt", "w", encoding = "UTF-8")
+    res_file.write(str(response.read()))
+    res_file.close()
+    print("Список стран загружен")
+     
+    data_file = open("countries.txt")
+    data_string = data_file.read()
+    list_codes = re.findall(r"[A-Z]{2}", data_string)
+    data_string = re.sub(r"[A-Z]{2}", "...", data_string)
+    list_countries = re.findall(r"[a-zA-Z\s,-]{4,}", data_string)
 
-    Для получения температуры по Цельсию:
-    http://api.openweathermap.org/data/2.5/weather?id=520068&units=metric&appid=b1b15e88fa797225412429c1c50c122a
+    countries = []
+    for i in range(0, len(list_codes)):
+        new_country = Country(list_codes[i], list_countries[i])
+        countries.append(new_country)
 
-    Для запроса по нескольким городам сразу:
-    http://api.openweathermap.org/data/2.5/group?id=524901,703448,2643743&units=metric&appid=b1b15e88fa797225412429c1c50c122a
-
-
-    Данные о погоде выдаются в JSON-формате
-    {"coord":{"lon":38.44,"lat":55.87},
-    "weather":[{"id":803,"main":"Clouds","description":"broken clouds","icon":"04n"}],
-    "base":"cmc stations","main":{"temp":280.03,"pressure":1006,"humidity":83,
-    "temp_min":273.15,"temp_max":284.55},"wind":{"speed":3.08,"deg":265,"gust":7.2},
-    "rain":{"3h":0.015},"clouds":{"all":76},"dt":1465156452,
-    "sys":{"type":3,"id":57233,"message":0.0024,"country":"RU","sunrise":1465087473,
-    "sunset":1465149961},"id":520068,"name":"Noginsk","cod":200}    
-
-
-== Сохранение данных в локальную БД ==    
-Программа должна позволять:
-1. Создавать файл базы данных SQLite со следующей структурой данных
-   (если файла базы данных не существует):
-
-    Погода
-        id_города           INTEGER PRIMARY KEY
-        Город               VARCHAR(255)
-        Дата                DATE
-        Температура         INTEGER
-        id_погоды           INTEGER                 # weather.id из JSON-данных
-
-2. Выводить список стран из файла и предлагать пользователю выбрать страну 
-(ввиду того, что список городов и стран весьма велик
- имеет смысл запрашивать у пользователя имя города или страны
- и искать данные в списке доступных городов/стран (регуляркой))
-
-3. Скачивать JSON (XML) файлы погоды в городах выбранной страны
-4. Парсить последовательно каждый из файлов и добавлять данные о погоде в базу
-   данных. Если данные для данного города и данного дня есть в базе - обновить
-   температуру в существующей записи.
-
-
-При повторном запуске скрипта:
-- используется уже скачанный файл с городами;
-- используется созданная база данных, новые данные добавляются и обновляются.
-
-
-При работе с XML-файлами:
-
-Доступ к данным в XML-файлах происходит через пространство имен:
-<forecast ... xmlns="http://weather.yandex.ru/forecast ...>
-
-Чтобы работать с пространствами имен удобно пользоваться такими функциями:
-
-    # Получим пространство имен из первого тега:
-    def gen_ns(tag):
-        if tag.startswith('{'):
-            ns, tag = tag.split('}')
-            return ns[1:]
+    chars = ""
+    c_list = countries
+    while True:
+        print("\nВ списке стран {} позиций".format(get_num_elements_with_chars(c_list, chars)))
+        print("\nВОЗМОЖНЫЕ ДЕЙСТВИЯ")
+        print("1: Сократить список вводом нескольких первых букв")
+        print("2: Выбрать позицию из списка")
+        print("Q: Завершить работу")
+        index = input("Ваш выбор: ")
+        if index == "Q":
+            break
+        elif index == "1":
+            chars = input("Dведите несколько первых букв названия, начиная с заглавной: ")
+            c_list = get_list_filtered_by_name(countries, chars)
+        elif index == "2":    
+            my_country_info = get_list_element_id_name(c_list)
+            return my_country_info
+            if my_country: break
         else:
-            return ''
+            print("Неправильный выбор")
+ 
+def choose_city(country): 
+    print("Загружается список городов из страны: ", country)
+    response = urllib.request.urlopen("http://bulk.openweathermap.org/sample/city.list.json.gz").read()
+    res_file = open("arch.gz", "wb")
+    res_file.write(response)
+    res_file.close()
+    print("Список городов загружен...")
+    inF = gzip.open("arch.gz")
+    res_file = open("cities.json", "wb")
+    s = inF.read()
+    res_file.write(s)
+    res_file.close()
+    inF.close()
+    print("и распакован")
 
-    tree = ET.parse(f)
-    root = tree.getroot()
+    path = "cities.json"
+    data_city = get_list_from_json_file(path)
+       
+    city_list = []
+    for city_info in data_city:
+        new_city = City(city_info)
+        city_list.append(new_city)
+        
+    cities = get_list_filtered_by_id(city_list, country)
+    chars = ""
+    c_list = cities
+    while True:
+        print("\nВ списке городов {} позиций".format(get_num_elements_with_chars(c_list, chars)))
+        print("\nВОЗМОЖНЫЕ ДЕЙСТВИЯ")
+        print("1: Сократить список вводом нескольких первых букв")
+        print("2: Выбрать позицию из списка")
+        print("Q: Завершить работу")
+        index = input("Ваш выбор: ")
+        if index == "Q":
+            break
+        elif index == "1":
+            chars = input("Dведите несколько первых букв названия, начиная с заглавной: ")
+            c_list = get_list_filtered_by_name(cities, chars)
+        elif index == "2":    
+            my_city_info = get_list_element_id_name(c_list)
+            return my_city_info
+            if my_city: break
+        else:
+            print("Неправильный выбор")
+            
+def get_weather_info(city, country):
+    city_url = "http://api.openweathermap.org/data/2.5/weather?id={}&appid=b502f7497af3a5db6ecd6460ccdd9e01".format(city[0])
+    response = urllib.request.urlopen(city_url)
+    res_file = open("result.txt", "w", encoding = "UTF-8")
+    res_file.write(str(response.read()))
+    res_file.close()
+    # на всякий случай записали информацию в файл и теперь читаем из него 
+    path = "result.txt"
+    fileObj = codecs.open( path, "r", "utf_8_sig" )
+    text = fileObj.read()
+    info = text.replace("b'","[")
+    info = info[:-1] +"]"
+    info = json.loads(info)
+    info = info[0]
+        
+    print("\nИНФОРМАЦИЯ О ПОГОДЕ  В ГОРОДЕ:", city[1], ", ", country[1])
+    print("Состояние неба: ",info["weather"][0]["description"])
+    print("Скорость ветра: {} км/час".format(info["wind"]["speed"]))
+    print("Направление ветра: ",info["wind"]["deg"])
+    print("Относительная влажность: {} %".format(info["main"]["humidity"]))
+    print("Атмосферное давление: {} ГПа".format(info["main"]["pressure"]))
+    print("Температура воздуха: {} по Цельсию".format(int(info["main"]["temp_min"]-273)))
+    
+def remove_file_if_exist(file_name):
+    try:
+        os.remove(file_name)
+    except FileNotFoundError:
+        pass
+   
 
-    # Определим словарь с namespace
-    namespaces = {'ns': gen_ns(root.tag)}
-
-    # Ищем по дереву тегов
-    for day in root.iterfind('ns:day', namespaces=namespaces):
-        ...
-
-"""
+# выбираем страну из скачанного списка
+my_country = choose_country() 
+print("Страна: ", my_country[1])
+if my_country:
+    # выбираем город из скачанного списка выбранной страны
+    my_city = choose_city(my_country[0])
+    if my_city:
+        get_weather_info(my_city, my_country)
+        print("Информация записана в файл resilt.txt")
+    else:
+        print("Город не был выбран, заканчиваем работу")
+else:
+    print("Страна не была выбрана, заканчиваем работу")
+    
+choice = input("Почистить папку от файлов с информацией(Y/N)? :")
+if choice:
+    remove_file_if_exist("arch.gz")
+    remove_file_if_exist("cities.json")
+    remove_file_if_exist("countries.txt")
 
